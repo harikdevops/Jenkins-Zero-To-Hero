@@ -246,10 +246,20 @@ Click on New Item. Select Pipeline and Enter an Item name.
 
 Select your repository where your Java application code is present. Make changes in Repository according to your DockerHub Id and GitHub Id in spring-boot-app/JenkinsFile and spring-boot-app-manifest/deployment.yml
 
+![32](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/2e5cc563-9519-49ed-a1c9-14e52818fb91)
+
+Specify the branch and JenkinsFile path accordingly.
+
+![33](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/844877dd-abd9-4026-a9ed-0f95bb748210)
+
+
 Update this URL in spring-boot-app/JenkinsFile with your SonarQube URL(EC2 server)
 ```
 http://65.2.177.25:9000/
 ```
+![34](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/bfbc6055-357a-4d8d-b582-300b8a236f12)
+
+# Run Pipeline
 
 Prerequisites:
 
