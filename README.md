@@ -1,6 +1,7 @@
 # Jenkins Pipeline for Java based application using Maven, SonarQube, Argo CD and Kubernetes
 
-![image](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/2f165f4b-0e2c-4254-9b2f-be76aa6cfd8e)
+![10](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8bf3e2e1-18dd-4259-92f5-9fa5d85645d9)
+
 
 The project involves building and deploying a Java application using a CI/CD pipeline. Here are the steps involved:
 
@@ -21,15 +22,15 @@ Overall, this project demonstrates how to integrate various tools commonly used 
 
 Here are the step-by-step details to set up an end-to-end Jenkins pipeline for a Java application using SonarQube, Argo CD, Helm, and Kubernetes:
 
-# Setup an AWS EC2 Instance
+#  Setup an AWS EC2 Instance
 
 Login to an AWS account using a user with admin privileges and ensure your region is set to ap-south-1a Mumbai region.
 Move to the EC2 console. Click Launch Instance.
 For name use Jenkins
-![1](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/3df00fe1-67f0-425b-8c84-4a02b57ce3b2)
+![1](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/98fff9f2-2590-48dd-9d43-0dee9fc16525)
 
 Select AMIs as Ubuntu and select Instance Type as t2.medium. Create new Key Pair and Create a new Security Group with traffic allowed from ssh, http and https.
-![3](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/30063ccd-7256-4baf-8c1d-6e83b11a8db4)
+![3](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/729b2d4b-e2df-4d0f-b4ef-920f7e25ef2d)
 
 # Run Java application on EC2
 This step is optional. We want to see which application we wanted to deploy on the Kubernetes cluster.
@@ -40,35 +41,215 @@ git clone https://github.com/harikdevops/Jenkins-Zero-To-Hero.git
 cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
 sudo apt update
 sudo apt install maven
+
 ```
 ![4](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/12952a35-cb1c-4565-a5e9-325e2396d438)
+
 ```
 mvn clean package
 ```
+
 ![6](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/a3db897a-0d17-4cdb-8479-78885d805de0)
+
 ```
 mvn -v
 ```
 ![5](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/4ac8cdfd-ff79-4e14-baa3-5ccea54a6105)
-'''
+
+```
 sudo apt update
 sudo apt install docker.io
 sudo usermod -aG docker ubuntu
 sudo chmod 666 /var/run/docker.sock
 sudo systemctl restart docker
 docker build -t ultimate-cicd-pipeline:v1 .
-'''
+```
+
 ![7](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/0640d3cd-8762-42d1-bd69-6d5b89e13254)
+
 ```
 docker run -d -p 8010:8080 -t ultimate-cicd-pipeline:v1
 ```
 ![8](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/575f6d9b-7deb-4291-8dae-94f24b234f36)
 
 Add Security inbound rule for port 8001
+
 ```
 http://65.2.177.25:8001/
 ```
 ![9](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/52649cde-aeac-452e-8ee6-69b0d944215d)
+
+# Now we are going to deploy this application on Kubernetes by CICD pipeline.
+# Continuous Integration
+# 1. Install and Setup Jenkins
+
+Step 1: Install Jenkins
+Follow the steps for installing Jenkins on the EC2 instance -Jenkins.
+Pre-Requisites:
+ - Java (JDK)
+### Run the below commands to install Java and Jenkins
+
+Install Java
+
+```
+sudo apt update
+sudo apt install openjdk-11-jre
+```
+
+Verify Java is Installed
+
+```
+java -version
+```
+
+Now, you can proceed with installing Jenkins
+
+```
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+```
+
+**Note: ** By default, Jenkins will not be accessible to the external world due to the inbound traffic restriction by AWS. Open port 8080 in the inbound traffic rules as show below.
+
+- EC2 > Instances > Click on <Instance-ID>
+- In the bottom tabs -> Click on Security
+- Security groups
+- Add inbound traffic rules as shown in the image (you can just allow TCP 8080 as well, in my case, I allowed `All traffic`).
+![11](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/7eff3af6-578a-4b13-a259-0e7ea1841530)
+
+After you login to Jenkins, - Run the command to copy the Jenkins Admin Password - sudo cat /var/lib/jenkins/secrets/initialAdminPassword - Enter the Administrator password
+
+![12](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/26e2e44c-de65-476c-a69a-05454c299eeb)
+![14](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/08935f0e-5a8d-4602-9210-3a336e57734c)
+
+### Click on Install suggested plugins
+![13](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/d4af563f-b979-409d-9e30-3716268b17bc)
+### Wait for the Jenkins to Install suggested plugins
+![16](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/00d16e83-a274-4af6-846a-c883a40fcf28)
+
+Create First Admin User or Skip the step [If you want to use this Jenkins instance for future use-cases as well, better to create admin user]
+![17](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/66247865-cea8-4110-aa5e-d7fb706cdd96)
+![18](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/202cac49-31b9-4edc-9b0c-b2ce7444bda0)
+
+
+Jenkins Installation is Successful. You can now starting using the Jenkins
+![19](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/9f68e6ed-b040-4dd7-9e3b-dfa1b1fcce01)
+
+## Next Steps
+## 2. Configure a Sonar Server locally
+SonarQube is used as part of the build process (Continuous Integration and Continuous Delivery) in all Java services to ensure high-quality code and remove bugs that can be found during static analysis.
+### Configure a Sonar Server locally
+
+```
+sudo apt install unzip
+sudo adduser sonarqube
+sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.4.0.54424.zip
+sudo mv sonarqube-9.4.0.54424 /opt
+sudo unzip *
+sudo mv sonarqube-9.4.0.54424/ sonarqube
+sudo chmod -R 755 /opt/sonarqube/
+sudo chown -R sonarqube:sonarqube /opt/sonarqube/
+sudo cd sonarqube/bin/linux-x86-64/
+./sonar.sh start
+```
+
+Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000` 
+![20](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/134981d6-260f-4eaa-b18b-814b9ea912e0)
+
+Enter Login as admin and password as admin.
+Change with new password.
+# Credential for SonarQube that we will use in Jenkins pipeline 
+Go to the right-hand corner A then click on My Account ==> Security => Generate Tokens
+
+![21](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/955d874c-674e-4f21-8162-cdc1db5be071)
+
+
+## 3. Docker Slave Configuration
+
+Run the below command to Install Docker
+
+```
+sudo apt update
+sudo apt install docker.io
+```
+ 
+### Grant Jenkins user and Ubuntu user permission to docker deamon.
+
+```
+sudo su - 
+usermod -aG docker jenkins
+usermod -aG docker ubuntu
+systemctl restart docker
+```
+
+Once you are done with the above steps, it is better to restart Jenkins.
+
+```
+http://<ec2-instance-public-ip>:8080/restart
+```
+
+The docker agent configuration is now successful.
+
+# 4. Create Credentials in Jenkins
+# Step 1: Create Sonarqube Credentials in Jenkins
+-Please keep the below credentials ID name (sonarqube, docker-cred, github) as it is. Else according to your credentials, you need to make changes in Jenkinsfile
+Step 1: Credential for SonarQube
+Go to Manage Jenkins ==> Crendentials ==> System ==> Global credentials
+![22](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/2a0bf471-772d-4ffc-8c65-6e8f8083dea2)
+
+# Step 2: Create DockerHub Credentials in Jenkins
+- Setup Docker Hub Secret Text in Jenkins
+
+You can set the docker credentials by going into -
+
+Goto -> Jenkins -> Manage Jenkins -> Manage Credentials -> Stored scoped to jenkins -> global -> Add Credentials
+![23](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/77d7c361-98fa-449d-866f-031901823d3c)
+
+# Step 3: Create GitHub credentials in Jenkins
+Goto GitHub ==> Setting ==> Developer Settings ==> Personal access tokens ==> Tokens(Classic) ==> Generate new token
+
+![2](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/51fc23f8-f80a-46f9-a7c5-3025983a9d92)
+
+![24](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/451871e1-b1a1-48e3-952b-04a7aba5bd34)
+
+
+![25](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/79ffa36f-34ff-42c5-9c81-be6d0f6d9faa)
+
+
+# Install the necessary Jenkins plugins
+Goto Jenkins Dashboard \==> Manage Jenkins \==> Plugins \==> Available plugins
+
+- Docker Pipeline
+![26](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/ca3fa569-f28c-4080-b8d1-46a98d300f3d)
+
+- SonarQube Scanner
+![27](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/2e3f54e8-b9a0-497c-a4a2-9b496d1d5e63)
+
+- GitHub Integration
+  ![28](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/755456fd-d37e-4def-b9b5-bc03fe2b0c1c)
+
+- Do Jenkins Restart
+  ![29](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/0938cf99-4aeb-47cc-bc7d-d0e265b81580)
+
+# Create a new Jenkins pipeline
+ Github: https://github.com/harikdevops/Jenkins-Zero-To-Hero.git
+
+Click on New Item. Select Pipeline and Enter an Item name.
+![30](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/e6515885-b8d7-4577-8e23-b344a970e923)
+
+![31](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/3292ce56-73a6-44ee-ba9e-f1ee5009bf19)
+
+Select your repository where your Java application code is present. Make changes in Repository according to your DockerHub Id and GitHub Id in spring-boot-app/JenkinsFile and spring-boot-app-manifest/deployment.yml
+
+Update this URL in spring-boot-app/JenkinsFile with your SonarQube URL(EC2 server)
+```
+http://65.2.177.25:9000/
+```
 
 Prerequisites:
 
