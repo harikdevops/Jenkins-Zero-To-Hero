@@ -260,6 +260,177 @@ http://65.2.177.25:9000/
 ![34](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/bfbc6055-357a-4d8d-b582-300b8a236f12)
 
 # Run Pipeline
+![35](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/04440d3b-8756-4a8c-b358-7b85a43bf81b)
+
+# deployement.yml file gets updated with the latest image.
+![36](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/bfb6e0a1-ab06-45a6-8f38-a9f965c0636f)
+
+# SonarQube Output will be like this.
+
+![37](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/ea3784ad-d20c-456c-b7ae-f052da4b4bca)
+
+# Check DockerHub, that a new image is created for your Java application.
+
+![38](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/af6b4a35-b7b7-4ad8-9320-ec5f9e120600)
+
+This way, we completed CI ( Continuous Integration) Part. Java application is built, SonarQube completed static code analysis and the latest image is created, push to DockerHub and updated Manifest repository with the latest image.
+
+# Continuous Delivery Part
+
+
+# Kubernetes Setup Using Kubeadm In AWS EC2 Ubuntu Servers
+
+Prerequisite:
+2 - Ubuntu Serves
+1 - Manager  (4GB RAM , 2 Core) t2.medium
+1 - Workers  (1 GB, 1 Core)     t2.micro
+
+Note: Open Required Ports In AWS Security Groups. For now we will open All trafic.
+
+==========COMMON FOR MASTER & SLAVES START ====
+
+# First, login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
+```
+sudo su -
+```
+# Install Required packages and apt keys.
+```
+apt-get update -y
+```
+```
+apt-get install -y apt-transport-https
+```
+```
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+```
+```
+apt-get update -y
+```
+#Turn Off Swap Space
+```
+swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+```
+# Install And Enable Docker
+```
+apt install docker.io -y
+```
+```
+```
+usermod -aG docker ubuntu
+```
+```
+systemctl restart docker
+systemctl enable docker.service
+```
+
+# Install kubeadm, Kubelet And Kubectl
+```
+apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+```
+# Enable and start kubelet service
+```
+systemctl daemon-reload
+systemctl start kubelet
+systemctl enable kubelet.service
+```
+**==========COMMON FOR MASTER & SLAVES END=====**
+
+
+# Execute only in Master Node of the Kubernetes Cluster
+
+===========In Master Node Start====================
+# Steps Only For Kubernetes Master
+
+# Switch to the root user.
+```
+sudo su -
+```
+# Initialize Kubernates master by executing below commond.
+```
+kubeadm init
+```
+#exit root user & exeucte as normal user
+```
+exit
+```
+```
+mkdir -p $HOME/.kube
+```
+```
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+```
+```
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+# To verify, if kubectl is working or not, run the following command.
+```
+kubectl get pods -o wide --all-namespaces
+```
+#You will notice from the previous command, that all the pods are running except one: ‘kube-dns’. For resolving this we will install a # pod network. To install the weave pod network, run the following command:
+```
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+```
+or 
+```
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+```
+```
+kubectl get nodes
+```
+```
+kubectl get pods --all-namespaces
+```
+# Get token
+```
+kubeadm token create --print-join-command
+```
+**=========In Master Node End====================**
+
+# Execute in Worker Node
+
+- Add Worker Machines to Kubernates Master
+- Copy kubeadm join token from and execute in Worker Nodes to join to cluster
+```
+kubectl commonds has to be executed in master machine.
+```
+- Check Nodes
+```
+kubectl get nodes
+```
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+```
+kubeadm join 172.31.38.128:6443 --token 7monpy.v3flmhc86spyvlc7 \
+        --discovery-token-ca-cert-hash sha256:802e7b34779d1f78675e33a2d829532363c50ec7407e43f12d4a23da0815f45b
+```
+
+
+ArgoCD is utilized in Kubernetes to establish a completely automated continuous delivery pipeline for the configuration of Kubernetes. This tool follows the GitOps approach and operates in a declarative manner to deliver Kubernetes deployments seamlessly.
+
+Argo CD Setup
+Argo CD is a very simple and efficient way to have declarative and version-controlled application deployments with its automatic monitoring and pulling of manifest changes in the Git repo, but it also has easy rollback and reverts to the previous state, not manually reverting every update in the cluster.
+In this section, I provided a guide on achieving continuous deployment on Minikube. However, I understand that for Windows OS users, the process of setting up Virtual Box can be quite daunting, especially for those who are not familiar with the technology. Additionally, configuring Minikube and ArgoCD on a Virtual Box/EC2 instance can require more manual setup and configuration. Given these challenges, I would like to offer an alternative solution by explaining how to deploy the Java application on Amazon EKS. For that you need to refer to my blog - Continuous Delivery with Amazon EKS and ArgoCD
+
+
 
 Prerequisites:
 
