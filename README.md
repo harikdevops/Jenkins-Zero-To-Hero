@@ -278,12 +278,36 @@ This way, we completed CI ( Continuous Integration) Part. Java application is bu
 # Continuous Delivery Part
 
 
+
+
 # Kubernetes Setup Using Kubeadm In AWS EC2 Ubuntu Servers
 
-Prerequisite:
-2 - Ubuntu Serves
-1 - K8s-Master Manager  (4GB RAM , 2 Core) t2.medium 
-1 - Worker-Node Worker  (1 GB, 1 Core)     t2.micro  
+Prerequisites
+• A compatible Linux hosts
+• 2 GB or more of RAM per machine and 2 CPUs or more
+• 2 - Ubuntu Serves
+o 1x Manager (4GB RAM, 2 vCPU) t2.medium type
+o 3x Workers (1 GB, 1 Core) t2.micro type
+• Full network connectivity between all machines in the cluster 
+• Unique hostname, MAC address for each host. Change hostname of the servers at 
+/etc/hostname or using hostnamectl. Use Master for Master nodes and 
+worker_01, worker_02 and so on for worker nodes
+• Swap disabled. You MUST disable swap in order for the kubelet to work properly 
+• Certain ports are open on your 
+   machines(https://kubernetes.io/docs/reference/ports-and-protocols/)
+o Master
+Port range Purpose
+6443 These ports are used for Kubernetes API access.
+2379-2380 These ports are used for etcd server client API
+6783/tcp,6784/udp for Weavenet CNI
+10250 This port is used for Kubelet API
+10251 This port is used for kube-scheduler
+10252 This port is used for kube-controller-manager
+10255 Read-Only Kubelet API
+10248 Kubelet health
+80 For accessing demo apps
+8080
+443
 
 Note: Open Required Ports In AWS Security Groups. For now we will open All trafic.
 
