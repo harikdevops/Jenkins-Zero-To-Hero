@@ -282,12 +282,12 @@ This way, we completed CI ( Continuous Integration) Part. Java application is bu
 
 Prerequisite:
 2 - Ubuntu Serves
-1 - Manager  (4GB RAM , 2 Core) t2.medium
-1 - Workers  (1 GB, 1 Core)     t2.micro
+1 - K8s-Master Manager  (4GB RAM , 2 Core) t2.medium 
+1 - Worker-Node Worker  (1 GB, 1 Core)     t2.micro  
 
 Note: Open Required Ports In AWS Security Groups. For now we will open All trafic.
 
-==========COMMON FOR MASTER & SLAVES START ====
+### COMMON FOR MASTER & SLAVES START ###
 
 # First, login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
 ```
@@ -297,6 +297,10 @@ sudo su -
 ```
 apt-get update -y
 ```
+![62](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/161679b0-2d07-47f2-95f8-bc832e9299c7)
+
+![63](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/aa48f4dd-b6a8-4185-b461-0ab1d3a3362e)
+
 ```
 apt-get install -y apt-transport-https
 ```
@@ -309,6 +313,9 @@ EOF
 ```
 apt-get update -y
 ```
+![64](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/26672b8f-6b9d-4a6c-8f4f-36eed1c6edf0)
+![66](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/5d06b091-3ac0-4f12-824a-220b50489b80)
+
 #Turn Off Swap Space
 ```
 swapoff -a
@@ -318,6 +325,10 @@ sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 ```
 apt install docker.io -y
 ```
+![67](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/f17eb9a0-42e6-4bce-b2a6-401a5d663ac4)
+![68](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/dd5f7d78-14b0-45ca-8c99-2d4030f6ebbc)
+
+
 ```
 ```
 usermod -aG docker ubuntu
@@ -331,18 +342,22 @@ systemctl enable docker.service
 ```
 apt-get install -y kubelet kubeadm kubectl kubernetes-cni
 ```
+![70](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/09d3b7b4-b9a6-4f52-90bb-61842d9397f5)
+![69](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/91e9b847-646d-4b49-bff5-6517e644c1f2)
+
+
 # Enable and start kubelet service
 ```
 systemctl daemon-reload
 systemctl start kubelet
 systemctl enable kubelet.service
 ```
-**==========COMMON FOR MASTER & SLAVES END=====**
+**##### COMMON FOR MASTER & SLAVES END #####**
 
 
-# Execute only in Master Node of the Kubernetes Cluster
+#  Execute only in Master Node of the Kubernetes Cluster
 
-===========In Master Node Start====================
+**********************   In Master Node Start   ***********************************
 # Steps Only For Kubernetes Master
 
 # Switch to the root user.
@@ -353,6 +368,8 @@ sudo su -
 ```
 kubeadm init
 ```
+![71](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8e1cac04-067a-4be2-99fa-c4d5e752e8f7)
+
 #exit root user & exeucte as normal user
 ```
 exit
