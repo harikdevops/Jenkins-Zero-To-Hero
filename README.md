@@ -9,6 +9,8 @@
 
 
 
+
+
 The project involves building and deploying a Java application using a CI/CD pipeline. Here are the steps involved:
 
 Version Control: The code is stored in a version control system such as Git, and hosted on GitHub. The code is organized into branches such as the main or development branch.
@@ -88,15 +90,18 @@ http://65.2.177.25:8001/
 ![9](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/52649cde-aeac-452e-8ee6-69b0d944215d)
 
 
+
 # Now we are going to deploy this application on Kubernetes by CICD pipeline.
 
 # Continuous Integration
+
 # 1. Install and Setup Jenkins
 
 Step 1: Install Jenkins
 Follow the steps for installing Jenkins on the EC2 instance -Jenkins.
 Pre-Requisites:
  - Java (JDK)
+
 ### Run the below commands to install Java and Jenkins
 
 Install Java
@@ -147,6 +152,7 @@ Jenkins Installation is Successful. You can now starting using the Jenkins
 ![19](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/9f68e6ed-b040-4dd7-9e3b-dfa1b1fcce01)
 
 ## Next Steps
+
 ## 2. Configure a Sonar Server locally
 SonarQube is used as part of the build process (Continuous Integration and Continuous Delivery) in all Java services to ensure high-quality code and remove bugs that can be found during static analysis.
 ### Configure a Sonar Server locally
@@ -169,6 +175,7 @@ Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000
 
 Enter Login as admin and password as admin.
 Change with new password.
+
 # Credential for SonarQube that we will use in Jenkins pipeline 
 Go to the right-hand corner A then click on My Account ==> Security => Generate Tokens
 
@@ -202,11 +209,13 @@ http://<ec2-instance-public-ip>:8080/restart
 The docker agent configuration is now successful.
 
 # 4. Create Credentials in Jenkins
+
 # Step 1: Create Sonarqube Credentials in Jenkins
 -Please keep the below credentials ID name (sonarqube, docker-cred, github) as it is. Else according to your credentials, you need to make changes in Jenkinsfile
 Step 1: Credential for SonarQube
 Go to Manage Jenkins ==> Crendentials ==> System ==> Global credentials
 ![22](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/2a0bf471-772d-4ffc-8c65-6e8f8083dea2)
+
 
 # Step 2: Create DockerHub Credentials in Jenkins
 - Setup Docker Hub Secret Text in Jenkins
@@ -243,6 +252,7 @@ Goto Jenkins Dashboard \==> Manage Jenkins \==> Plugins \==> Available plugins
   ![29](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/0938cf99-4aeb-47cc-bc7d-d0e265b81580)
 
 # Create a new Jenkins pipeline
+
  Github: https://github.com/harikdevops/Jenkins-Zero-To-Hero.git
 
 Click on New Item. Select Pipeline and Enter an Item name.
@@ -286,13 +296,16 @@ This way, we completed CI ( Continuous Integration) Part. Java application is bu
 
 ArgoCD is utilized in Kubernetes to establish a completely automated continuous delivery pipeline for the configuration of Kubernetes. This tool follows the GitOps approach and operates in a declarative manner to deliver Kubernetes deployments seamlessly.
 
-Argo CD Setup
+# Argo CD Setup
+
 Argo CD is a very simple and efficient way to have declarative and version-controlled application deployments with its automatic monitoring and pulling of manifest changes in the Git repo, but it also has easy rollback and reverts to the previous state, not manually reverting every update in the cluster.
-In this section, I provided a guide on achieving continuous deployment on Minikube. However, I understand that for Windows OS users, the process of setting up Virtual Box can be quite daunting, especially for those who are not familiar with the technology. Additionally, configuring Minikube and ArgoCD on a Virtual Box/EC2 instance can require more manual setup and configuration. Given these challenges, I would like to offer an alternative solution by explaining how to deploy the Java application on Amazon EKS. For that you need to refer to my blog - Continuous Delivery with Amazon EKS and ArgoCD
 
-For Continuous Delivery with Minikube and ArgoCD, follow the below steps.
+In this section, I provided a guide on achieving continuous deployment on Minikube. 
 
-Setup Minikube
+# For Continuous Delivery with Minikube and ArgoCD, follow the below steps.
+
+# Setup Minikube
+
 Minikube is a tool that enables users to set up and run a single-node Kubernetes cluster on their local machine. It is useful for developers who want to test their applications in a local Kubernetes environment before deploying them to a production cluster. Minikube provides an easy way to learn and experiment with Kubernetes without the need for a complex setup.
 
 After performing the steps we install Minikube and start it.
@@ -306,6 +319,7 @@ sudo usermod -aG docker $USER && newgrp docker
 sudo reboot docker
 minikube start --driver=docker
 ```
+
 ![74](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/80945e3b-957c-491f-9145-5bc96c5402ec)
 
 
@@ -342,7 +356,7 @@ kubectl get pods -n operators
 ![78](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/69a19402-c863-4357-b2d6-4cc55edca5b5)
 
 
-Goto link https://argocd-operator.readthedocs.io/en/latest/usage/basics/
+Goto link https://argocd-operator.readthedocs.io/en/latest/usage/basics/ 
 
 The following example shows the most minimal valid manifest to create a new Argo CD cluster with the default configuration.
 
@@ -366,11 +380,14 @@ kubectl edit svc example-argocd-server
 minikube service example-argocd-server
 kubectl get secret
 ```
+
 ![80](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/f5c35bd8-5d03-485c-b7fc-a57e3f60c40b)
+
 
 NodePort services are useful for exposing pods to external traffic where clients have network access to the Kubernetes nodes.
 
 kubectl edit svc example-argocd-server And change from ClusterIP to NodePort. Save it.
+
 ![88](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8645d04c-7df6-4161-9376-508ba9bd0b8a)
 ![89](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/6f4fbda0-147f-4be3-bf80-875a35e827c6)
 
@@ -427,3 +444,5 @@ Thank you
 By completing this exercise, you will gain a comprehensive understanding of the complete CI pipeline of Jenkins, specifically for Java-based applications. The pipeline integrates several tools such as GitHub, Maven, DockerHub, and SonarQube. Furthermore, ArgoCD and Kubernetes are utilized to enable continuous delivery (CD).
 
 Thanks for reading to the end; I hope you gained some knowledge.
+
+Happy Learning !!!! :smiley:
