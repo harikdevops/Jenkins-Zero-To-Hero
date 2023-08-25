@@ -1,6 +1,8 @@
 # Jenkins Pipeline for Java based application using Maven, SonarQube, Argo CD and Kubernetes
 
-![10](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8bf3e2e1-18dd-4259-92f5-9fa5d85645d9)
+![CICD drawio](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/62e15773-88af-4a92-baee-474e9fb75596)
+
+
 
 
 The project involves building and deploying a Java application using a CI/CD pipeline. Here are the steps involved:
