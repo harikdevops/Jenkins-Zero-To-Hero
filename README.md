@@ -5,6 +5,10 @@
 
 
 
+
+
+
+
 The project involves building and deploying a Java application using a CI/CD pipeline. Here are the steps involved:
 
 Version Control: The code is stored in a version control system such as Git, and hosted on GitHub. The code is organized into branches such as the main or development branch.
@@ -280,70 +284,146 @@ This way, we completed CI ( Continuous Integration) Part. Java application is bu
 # Continuous Delivery Part
 
 
-
-
-
-
 ArgoCD is utilized in Kubernetes to establish a completely automated continuous delivery pipeline for the configuration of Kubernetes. This tool follows the GitOps approach and operates in a declarative manner to deliver Kubernetes deployments seamlessly.
 
 Argo CD Setup
 Argo CD is a very simple and efficient way to have declarative and version-controlled application deployments with its automatic monitoring and pulling of manifest changes in the Git repo, but it also has easy rollback and reverts to the previous state, not manually reverting every update in the cluster.
 In this section, I provided a guide on achieving continuous deployment on Minikube. However, I understand that for Windows OS users, the process of setting up Virtual Box can be quite daunting, especially for those who are not familiar with the technology. Additionally, configuring Minikube and ArgoCD on a Virtual Box/EC2 instance can require more manual setup and configuration. Given these challenges, I would like to offer an alternative solution by explaining how to deploy the Java application on Amazon EKS. For that you need to refer to my blog - Continuous Delivery with Amazon EKS and ArgoCD
 
+For Continuous Delivery with Minikube and ArgoCD, follow the below steps.
+
+Setup Minikube
+Minikube is a tool that enables users to set up and run a single-node Kubernetes cluster on their local machine. It is useful for developers who want to test their applications in a local Kubernetes environment before deploying them to a production cluster. Minikube provides an easy way to learn and experiment with Kubernetes without the need for a complex setup.
+
+After performing the steps we install Minikube and start it.
+
+```
+sudo apt-get update
+sudo apt-get install docker.io
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+sudo usermod -aG docker $USER && newgrp docker
+sudo reboot docker
+minikube start --driver=docker
+```
+![74](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/80945e3b-957c-491f-9145-5bc96c5402ec)
 
 
-Prerequisites:
+# Install kubectl
 
-   -  Java application code hosted on a Git repository
-   -   Jenkins server
-   -  Kubernetes cluster
-   -  Helm package manager
-   -  Argo CD
+Kubectl is a command-line interface (CLI) tool that is used to interact with Kubernetes clusters. It allows users to deploy, inspect, and manage Kubernetes resources such as pods, deployments, services, and more. Kubectl enables users to perform operations such as creating, updating, deleting, and scaling Kubernetes resources.
 
-Steps:
+Run the following steps to install kubectl.
 
-    1. Install the necessary Jenkins plugins:
-       1.1 Git plugin
-       1.2 Maven Integration plugin
-       1.3 Pipeline plugin
-       1.4 Kubernetes Continuous Deploy plugin
+```
+curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+kubectl version
+```
 
-    2. Create a new Jenkins pipeline:
-       2.1 In Jenkins, create a new pipeline job and configure it with the Git repository URL for the Java application.
-       2.2 Add a Jenkinsfile to the Git repository to define the pipeline stages.
 
-    3. Define the pipeline stages:
-        Stage 1: Checkout the source code from Git.
-        Stage 2: Build the Java application using Maven.
-        Stage 3: Run unit tests using JUnit and Mockito.
-        Stage 4: Run SonarQube analysis to check the code quality.
-        Stage 5: Package the application into a JAR file.
-        Stage 6: Deploy the application to a test environment using Helm.
-        Stage 7: Run user acceptance tests on the deployed application.
-        Stage 8: Promote the application to a production environment using Argo CD.
+# Install Argo CD operator
 
-    4. Configure Jenkins pipeline stages:
-        Stage 1: Use the Git plugin to check out the source code from the Git repository.
-        Stage 2: Use the Maven Integration plugin to build the Java application.
-        Stage 3: Use the JUnit and Mockito plugins to run unit tests.
-        Stage 4: Use the SonarQube plugin to analyze the code quality of the Java application.
-        Stage 5: Use the Maven Integration plugin to package the application into a JAR file.
-        Stage 6: Use the Kubernetes Continuous Deploy plugin to deploy the application to a test environment using Helm.
-        Stage 7: Use a testing framework like Selenium to run user acceptance tests on the deployed application.
-        Stage 8: Use Argo CD to promote the application to a production environment.
+ArgoCD is a widely-used GitOps continuous delivery tool that automates application deployment and management on Kubernetes clusters, leveraging Git repositories as the source of truth. It offers a web-based UI and a CLI for managing deployments, and it integrates with other tools. ArgoCD streamlines the deployment process on Kubernetes clusters and is a popular tool in the Kubernetes ecosystem.
 
-    5. Set up Argo CD:
-        Install Argo CD on the Kubernetes cluster.
-        Set up a Git repository for Argo CD to track the changes in the Helm charts and Kubernetes manifests.
-        Create a Helm chart for the Java application that includes the Kubernetes manifests and Helm values.
-        Add the Helm chart to the Git repository that Argo CD is tracking.
+The Argo CD Operator manages the full lifecycle of Argo CD and its components. The operator's goal is to automate the tasks required when operating an Argo CD cluster.
 
-    6. Configure Jenkins pipeline to integrate with Argo CD:
-       6.1 Add the Argo CD API token to Jenkins credentials.
-       6.2 Update the Jenkins pipeline to include the Argo CD deployment stage.
+```
+curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.25.0/install.sh | bash -s v0.25.0
+kubectl create -f https://operatorhub.io/install/argocd-operator.yaml
+kubectl get csv -n operators
+kubectl get pods -n operators
+```
+![76](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/5123ea1f-c9ba-4ef0-8228-a726140f026f)
 
-    7. Run the Jenkins pipeline:
-       7.1 Trigger the Jenkins pipeline to start the CI/CD process for the Java application.
-       7.2 Monitor the pipeline stages and fix any issues that arise.
+![77](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/6aa33432-7af6-4a4b-a11c-984d512f3b2b)
+
+![78](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/69a19402-c863-4357-b2d6-4cc55edca5b5)
+
+
+Goto link https://argocd-operator.readthedocs.io/en/latest/usage/basics/
+
+The following example shows the most minimal valid manifest to create a new Argo CD cluster with the default configuration.
+
+Create argocd-basic.yml with the following content.
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: example-argocd
+  labels:
+    example: basic
+spec: {}
+```
+
+```
+kubectl apply -f argocd-basic.yml
+kubectl get pods
+kubectl get svc
+kubectl edit svc example-argocd-server
+minikube service example-argocd-server
+kubectl get secret
+```
+![80](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/f5c35bd8-5d03-485c-b7fc-a57e3f60c40b)
+
+NodePort services are useful for exposing pods to external traffic where clients have network access to the Kubernetes nodes.
+
+kubectl edit svc example-argocd-server And change from ClusterIP to NodePort. Save it.
+![88](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8645d04c-7df6-4161-9376-508ba9bd0b8a)
+![89](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/6f4fbda0-147f-4be3-bf80-875a35e827c6)
+
+Password for Argo CD
+Find out password for Argo CD, so that, we can access Argo CD web interface.
+
+```
+kubectl get secret
+kubectl edit secret example-argocd-cluster
+```
+Copy admin.password
+![90](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/8963535f-25a3-4829-a417-27f73a0acf0d)
+
+
+![91](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/9f718024-f4d9-4a31-be2b-41c60263612c)
+
+```
+echo <admin.password> | base64 -d
+```
+Argo CD Configuration
+Username : admin
+
+Password : BEo1NaA7SIZm8n4devqpWKhly5jcYOwV
+
+![100](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/939e8d80-85b9-4a33-aa72-51c029f194a8)
+
+We will use the Argo CD web interface to run sprint-boot-app.
+
+Setup Github Repository manifest and Kubernetes cluster.
+
+![93](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/41d098af-8e0d-4448-9afa-cc0564258267)
+![94](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/d4b6d7f4-903a-46a8-b91d-66576eebf5ac)
+![95](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/00d8ddeb-7ada-449f-8402-db5dd7b99e39)
+![96](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/4bc0e2ca-53ce-45de-9957-b553196ef652)
+
+After Create. You can check if pods are running for sprint-boot-app
+
+![97](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/a48cc7fc-7315-45bc-93d8-4ce30b6bedc4)
+
+
+You have now successfully deployed an application using Argo CD.
+
+Argo CD is a Kubernetes controller, responsible for continuously monitoring all running applications and comparing their live state to the desired state specified in the Git repository.
+
+![98](https://github.com/harikdevops/Jenkins-Zero-To-Hero/assets/142023175/5da678d6-c283-4b4f-bb82-93a0c5cb68b0)
 
 This end-to-end Jenkins pipeline will automate the entire CI/CD process for a Java application, from code checkout to production deployment, using popular tools like SonarQube, Argo CD, Helm, and Kubernetes.
+
+
+References:
+https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero
+
+Thank you
+By completing this exercise, you will gain a comprehensive understanding of the complete CI pipeline of Jenkins, specifically for Java-based applications. The pipeline integrates several tools such as GitHub, Maven, DockerHub, and SonarQube. Furthermore, ArgoCD and Kubernetes are utilized to enable continuous delivery (CD).
+
+Thanks for reading to the end; I hope you gained some knowledge.
